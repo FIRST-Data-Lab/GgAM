@@ -620,4 +620,4 @@ predict.plbpsm <- function(object, newdata, type = "response", se.fit=FALSE,
   if ((type=="terms")&&attr(object$terms,"intercept")==1 && length(object$basis_info)==0)
   {attr(H,"constant") <- object$coefficients[1]} else{attr(H,"constant") <- NULL}
   H # ... and return
-} ## end of predict.gam
+}
