@@ -88,14 +88,9 @@
 #' formula <- y~c1+c2+c3+c4+c5+c6+c7+c8+c9+c10+c11+c12+c13+c14+c15+b(loc1,loc2,V=V,Tr=Tr,d=2,r=1)
 #' res_poi <- plbpsm(formula=formula,family=poisson(),data=as.data.frame(sam))
 #'
-#' # with offset
-#' res_poi2 <- plbpsm(formula=formula,family=poisson(),offset=rep(0.1,length(data$y)),
-#' data <- as.data.frame(sam))
-#' newdata <- as.data.frame(sam[sample(1:dim(sam)[1],90),])
-#'
 #' # return the predicted value for each term #
+#' newdata <- as.data.frame(sam[sample(1:dim(sam)[1],90),])
 #' predict(res_poi,newdata,type='terms',se.fit = TRUE)
-#' predict(res_poi2,newdata)
 #'
 #' data(eg1pop_bin_rho00)
 #' formula <- Y~z1+z2+z3+b(x1,x2,V=eg1_V2,Tr=eg1_T2,d=2,r=1)
@@ -360,17 +355,17 @@ predict.plbpsm <- function(object, newdata, type = "response", se.fit=FALSE,
     if (n.blocks==1) data <- newdata else data <- newdata[start:stop,]
     X <- matrix(0,b.size[b],nb)
     Xoff <- matrix(0,b.size[b],n.smooth) ## term specific offsets
-    for (i in 1:length(Terms)) { ## loop for parametric components (1 per lp)
+    #for (i in 1:length(Terms)) { ## loop for parametric components (1 per lp)
       ## implements safe prediction for parametric part as described in
       ## http://developer.r-project.org/model-fitting-functions.txt
       if (new.data.ok) {
         if (nd.is.mf) mf <- model.frame(data) else {
-          mf <- model.frame(Terms[[i]],data)
-          if (!is.null(cl <- attr(pterms[[i]],"dataClasses"))) .checkMFClasses(cl,mf)
+          mf <- model.frame(Terms[[1]],data)
+          if (!is.null(cl <- attr(pterms,"dataClasses"))) .checkMFClasses(cl,mf)
         }
-        Xp <- model.matrix(Terms[[i]],mf,contrasts=object$contrasts)
+        Xp <- model.matrix(Terms[[1]],mf,contrasts=object$contrasts)
       } else {
-        Xp <- model.matrix(Terms[[i]],object$model)
+        Xp <- model.matrix(Terms[[1]],object$model)
         mf <- newdata # needed in case of offset, below
       }
       # if (drop.intercept) {
@@ -383,9 +378,9 @@ predict.plbpsm <- function(object, newdata, type = "response", se.fit=FALSE,
         if (length(object$ind.l)>0){
             Xp=cbind(Xp,data[, sapply(object$basis_info_MI[object$ind.l],function(X){X$term})])
         }
-        if (object$nsdf[i]>0) X[,1:(object$nsdf[i]+length(object$ind.l))] <- as.matrix(Xp)
-      } else {if (object$nsdf[i]>0) X[,1:object$nsdf[i]] <- Xp}
-    } ## end of parametric loop
+        if (object$nsdf>0) X[,1:(object$nsdf+length(object$ind.l))] <- as.matrix(Xp)
+      } else {if (object$nsdf>0) X[,1:object$nsdf] <- Xp}
+    #} ## end of parametric loop
 
     #if (!is.null(drop.ind)) X <- X[,-drop.ind]
 
