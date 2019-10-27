@@ -60,6 +60,7 @@ useful for CI's as smooths are usually biased.}
 \item{prior.weights}{prior weights of observations.}
 \item{X2}{The design matrix with linear covariates and univariate functions.}
 \item{mhat}{estimated component functions in the evaluated in the sample points.}
+\item{mhat.sbl}{estimated component functions with SBL estimates in the evaluated in the sample points.}
 \item{y}{response data.}
 \item{est_theta}{estimated theta in the negative binomial family.}
 \item{ind.l}{The index for linear covariates in model identification.}
