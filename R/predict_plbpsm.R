@@ -159,12 +159,6 @@ predict.plbpsm <- function(object, newdata, type = "response", se.fit=FALSE,
   #              == "na.omit" or "na.exclude" then NA predictors result in
   #                       dropping
 
-  # backfitting use its own algorithm
-  # if (backfitting){
-  #   H=predict_backfitting(object,as.data.frame(newdata),type=type,...)
-  #   return(H)
-  # } else {
-
 
   if (type!="link"&&type!="terms"&&type!="response")  {
     warning("Unknown type, reset to terms.")
@@ -293,8 +287,6 @@ predict.plbpsm <- function(object, newdata, type = "response", se.fit=FALSE,
 
   if (type=="terms") {
     term.labels <- attr(object$pterms,"term.labels")
-    # if (is.null(attr(object,"para.only"))) para.only <-FALSE else
-    #   para.only <- TRUE  # if true then only return information on parametric part
     n.pterms <- length(term.labels)
     if (object$MI){
       n.pterms=n.pterms+length(object$ind.l)
@@ -306,9 +298,7 @@ predict.plbpsm <- function(object, newdata, type = "response", se.fit=FALSE,
   } else { ## "response" or "link"
     fit <- array(NA,np)
     if (se.fit) se <- fit
-    #fit1 <- NULL ## "response" returned by fam$fv can be non-vector
   }
-  ##se: 100 9
   stop <- 0
   # if (is.list(object$pterms)) { ## multiple linear predictors
   #   pstart <- attr(object$nsdf,"pstart") ## starts of parametric blocks in coef vector
@@ -382,9 +372,6 @@ predict.plbpsm <- function(object, newdata, type = "response", se.fit=FALSE,
 
         if (object$nsdf>0) X[,1:(object$nsdf+length(object$ind.l))] <- as.matrix(Xp)
       } else {if (object$nsdf>0) X[,1:object$nsdf] <- Xp}
-    #} ## end of parametric loop
-
-    #if (!is.null(drop.ind)) X <- X[,-drop.ind]
 
     ### BPST Predictions ###
 
@@ -469,7 +456,6 @@ predict.plbpsm <- function(object, newdata, type = "response", se.fit=FALSE,
       newX3 <-matrix(0,ncol=1,nrow=length(newind))
       object$coefficients <-0
     }
-    #newind3 <-which(!is.na(newind2) && !is.na(newX2))
     newind30 <-newind2[!is.na(newind2)]
     newind3 <-newind30[apply(newX2, 1, function(x) !any(is.na(x))) ]
     newX2 <-newX2[apply(newX2, 1, function(x) !any(is.na(x))),,drop=FALSE]
@@ -499,11 +485,10 @@ predict.plbpsm <- function(object, newdata, type = "response", se.fit=FALSE,
       if (n.smooth) {
         j=0
         if(n.smooth1>0){
-          #first <- if (object$intercept) {dim(as.matrix(Xp[,-1]))[2]} else {dim(as.matrix(Xp))[2]}
           first=n.pterms
           for (j in 1:n.smooth1) # work through the smooth terms
           { #first <- object$basis_info[[j]]$first.para; last <- object$basis_info[[k]]$last.para
-            n.para <- object$basis_info[[smooth.univariate[j]]]$n.para#-intecp
+            n.para <- object$basis_info[[smooth.univariate[j]]]$n.para
             last=first+n.para
             #fit <- fit[newind,,drop=FALSE]
 
@@ -586,8 +571,6 @@ predict.plbpsm <- function(object, newdata, type = "response", se.fit=FALSE,
   }
 
   if (type=="response") {
-    #fit <- fit1
-    #if (se.fit) se <- se1
     if (se.fit) se <-se
   }
 
