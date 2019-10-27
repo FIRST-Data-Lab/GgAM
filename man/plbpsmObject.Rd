@@ -14,10 +14,6 @@ this class.
 %that the elements relating to the QR decomposition of the model matrix are
 %absent.
 \value{ A \code{plbpsm} object has the following elements:
-\item{aic}{AIC of the fitted model: bear in mind that the degrees of freedom
-used to calculate this are the effective degrees of freedom of the model, and
-the likelihood is evaluated at the maximum of the penalized likelihood in most
-cases, not at the MLE.}
 \item{backfitting}{Whether Spline-backfitted local polynomial (SBL) estimate is applied.}
 \item{boundary}{did parameters end up at boundary of parameter space?}
 \item{call}{the matched call (allows \code{update} to be used with \code{plbpsm} objects, for example). }
@@ -73,4 +69,6 @@ useful for CI's as smooths are usually biased.}
 \item{h_opt_all}{optimal bandwidth for each component functions.}
 \item{backfitting}{Whether backfitting agorithm applied and SBL estimator is and used.}
 \item{weights}{final weights used in the iteration.}
+\item{Xp}{The design matrix for the parametric part of the model.}
+\item{nsdf}{number of parametric, non-smooth, model terms including the intercept.}
 }
