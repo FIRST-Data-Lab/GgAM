@@ -53,7 +53,6 @@ criterion used.}
 \item{scale}{defualt=1.}
 \item{se_beta}{estimated standard error for parametric covariates.}
 \item{sigma_2}{estimated scale parameter.}
-\item{sse}{Sum of squared error of the estimation.}
 \item{basis_info}{list of smooth objects, containing the basis information for each term in the
 model formula in the order in which they appear. These smooth objects are what gets returned by
 the \code{\link{BasisCon}} objects.}
