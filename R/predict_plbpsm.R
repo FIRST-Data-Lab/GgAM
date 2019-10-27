@@ -378,6 +378,7 @@ predict.plbpsm <- function(object, newdata, type = "response", se.fit=FALSE,
         if (length(object$ind.l)>0){
             Xp=cbind(Xp,data[, sapply(object$basis_info_MI[object$ind.l],function(X){X$term})])
         }
+        if (length(smooth.bivariate) > 0){object$nsdf <- object$nsdf+1}
         if (object$nsdf>0) X[,1:(object$nsdf+length(object$ind.l))] <- as.matrix(Xp)
       } else {if (object$nsdf>0) X[,1:object$nsdf] <- Xp}
     #} ## end of parametric loop
