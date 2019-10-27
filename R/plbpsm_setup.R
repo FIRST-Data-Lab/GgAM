@@ -2,9 +2,9 @@
 plbpsm.setup <- function(formula,pterms,
                        data=stop("No data supplied to plbpsm.setup"),
                        drop.intercept=FALSE,group)
-  ## set up the model matrix, penalty matrices and auxilliary information about the Bersterin bases
+  ## model matrix, penalty matrices and information set up about the univariate bivariate bases
 
-{ # split the formula if the object being passed is a formula, otherwise it's already split
+{
 
   if (inherits(formula,"split.plbpsm.formula")) split <- formula else
     if (inherits(formula,"formula")) split <- interpret.plbpsm0(formula) else stop("First argument is no sort of formula!")
@@ -14,24 +14,17 @@ plbpsm.setup <- function(formula,pterms,
       m <- 0
     } else  m <- length(split$smooth.spec) # number of spline terms
     G <- list(m=m,pterms=pterms) ##
-    if (is.null(attr(data,"terms"))) # then data is not a model frame
+    if (is.null(attr(data,"terms")))
       mf <- model.frame(split$pf,data,drop.unused.levels=FALSE) else mf <- data # data is already a model frame
     G$intercept <-  attr(attr(mf,"terms"),"intercept")>0
-    G$offset <- model.offset(mf)   # get the model offset (if any)
+    G$offset <- model.offset(mf)
     if (!is.null(G$offset))  G$offset <- as.numeric(G$offset)
 
     # construct parametric model matrix
     if (drop.intercept) attr(pterms,"intercept") <- 1 ## ensure there is an intercept to drop
     X <- model.matrix(pterms,mf)
     G$Xp <- X
-    # if (drop.intercept) { ## some extended families require intercept to be dropped
-    #   xat <- attributes(X);ind <- xat$assign>0
-    #   X <- X[,xat$assign>0,drop=FALSE] ## some extended families need to drop intercept
-    #   xat$assign <- xat$assign[ind];xat$dimnames[[2]]<-xat$dimnames[[2]][ind];
-    #   xat$dim[2] <- xat$dim[2]-1;attributes(X) <- xat
-    #   G$intercept <- FALSE
-    # }
-    rownames(X) <- NULL ## save memory
+    rownames(X) <- NULL
     G$mf <- mf
     G$nsdf <- ncol(X)
     G$contrasts <- attr(X,"contrasts")
