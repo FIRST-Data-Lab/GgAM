@@ -102,7 +102,10 @@ print(length(Xp))
     colnames(pred)<-ColNames
 
   }
+  mm.test=as.matrix(mm.test)
 
+  #print(dim(mm.test))
+  #print(dim(mhat.test))
   mhat.test=cbind(mhat.test,mm.test)
   if (type=='response'){
      eta_test=rowSums(as.matrix(mhat.test))
