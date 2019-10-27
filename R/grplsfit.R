@@ -635,17 +635,18 @@ grplsfit <- function(G, criterion, method, family, ind_c, VS, MI,...)
   n.ok <- nobs - sum(weights == 0)
   nulldf <- n.ok - as.integer(G$intercept)
   rank2<-ifelse(is.null(Gb),0,dim(Gb$Q2)[1])
-  aic.model <- aic(Y, n, mu, weights, dev) + 2 * sum(G$edf)
+  # aic.model <- aic(Y, n, mu, weights, dev) + 2 * sum(G$edf)
 
   object <- list(coefficients = as.vector(alpha_hat), coefficients_bivariate = as.vector(gamma_hat),
-              residuals = residuals_all,
+              residuals = residuals_all,dev_sbl=dev_sbl,
               fitted.values = fitted.values_all, family = family, linear.predictors = eta_all,
               deviance = dev, null.deviance = nulldev, edf=edf, prior.weights = weights_all,#edfs=edfs,
               df.null = nulldf,backfitting=G$backfitting,Xp=X3,
               y = G$y, sigma_2=sigma_2,#sig2 = G$sig2,
-              r = G$r, nsdf = G$nsdf, Ve = Ve,
-              gcv_opt= gcv, cv_opt=cv, aic = aic.model, rank = dim(G$X)[2],#fitted.values_all_sbl2=fitted.values_all_sbl2,
-              +rank2, mhat.sbl=mhat.sbl,mhat=mhat,X2=X2,h_opt_all=h_opt_all,fitted.values.sbl=fitted.values_all_sbl,
-              theta_hat=as.vector(theta_hat),ind_c=ind.c,sse=sse,
+              r = G$r, nsdf = G$nsdf, Ve = Ve, nsdf=G$nsdf,
+              gcv_opt= gcv, cv_opt=cv, # aic = aic.model,
+              mhat.sbl=mhat.sbl,mhat=mhat,X2=X2,h_opt_all=h_opt_all,
+              fitted.values.sbl=fitted.values_all_sbl,
+              theta_hat=as.vector(theta_hat),ind_c=ind.c,
               se_beta=se_beta,lam1=lam1,lam2=lam2, Ve=Ve,intercept=G$intercept,VS=VS)
 }
