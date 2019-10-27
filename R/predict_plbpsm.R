@@ -520,9 +520,6 @@ predict.plbpsm <- function(object, newdata, type = "response", se.fit=FALSE,
         if (se.fit) colnames(se) <- ColNames
       } else {
         if (is.list(object$pterms)) {
-          ## have to use term labels that match original data, or termplot fails
-          ## to plot. This only applies for 'para.only' calls which are
-          ## designed for use from termplot called from plot.gam
           term.labels <- unlist(lapply(object$pterms,attr,"term.labels"))
         }
         colnames(fit) <- term.labels
