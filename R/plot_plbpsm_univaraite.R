@@ -17,8 +17,8 @@ plot.band.univariate=function(x,xlab_u=NULL,main_u=NULL,xlim,ylim,shade=FALSE,sh
   ## ?
   n <- 10
   # if (shade) {
-    plot(x$x0,x$est,type='l',ylim=ylim,xlab = xlab_u,ylab='',main = main_u,xlim=xlim)
-    #,
+    plot(x$x0,x$est,type='l',ylim=ylim,xlab = xlab_u,ylab='',main = main_u,xlim=xlim, cex.main=1.5)
+    # to increase the font: cex.lab=1.5, cex.axis=1.5, cex.main=1.5, cex.sub=1.5
     polygon(c(x$x0, rev(x$x0)), c(x$upper, rev(x$lower)),
             col = "grey", border = NA)
     if(ab.line){
