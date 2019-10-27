@@ -135,29 +135,8 @@ predict.plbpsm <- function(object, newdata, type = "response", se.fit=FALSE,
   # be used in prediction......
   #
   # Type == "link"     - for linear predictor (may be several for extended case)
-  #      == "response" - for fitted values: may be several if several linear predictors,
-  #                      and may return something other than inverse link of l.p. for some families
-  #      == "terms"    - for individual terms on scale of linear predictor
-  # Steps are:
-  #  1. Set newdata to object$model if no newdata supplied
-  #  2. split up newdata into manageable blocks if too large
-  #  3. Obtain parametric model matrix (safely!)
-  #  4. Work through nonparametric terms
-  #  5. Work out required quantities
-  #
-  # if newdata.guaranteed == TRUE then the data.frame is assumed complete and
-  # ready to go, so that only factor levels are checked for sanity.
-  #
-  # if `terms' is non null then it should be a list of terms to be returned
-  # when type=="terms".
-  # if `object' has an attribute `para.only' then only parametric terms of order
-  # 1 are returned for type=="terms" : i.e. only what termplot can handle.
-  #
-  # if no new data is supplied then na.action does nothing, otherwise
-  # if na.action == "na.pass" then NA predictors result in NA predictions (as lm
-  #                   or glm)
-  #              == "na.omit" or "na.exclude" then NA predictors result in
-  #                       dropping
+  #      == "response" - for fitted values
+  #      == "terms"    - for individual terms
 
 
   if (type!="link"&&type!="terms"&&type!="response")  {
@@ -181,19 +160,18 @@ predict.plbpsm <- function(object, newdata, type = "response", se.fit=FALSE,
     }
   } ## ... done
 
-  # get data from which to predict.....
-  nd.is.mf <- FALSE # need to flag if supplied newdata is already a model frame
-  ## get name of response...
+  nd.is.mf <- FALSE
+
   yname <- all.vars(object$terms)[attr(object$terms,"response")]
   if (newdata.guaranteed==FALSE) {
-    if (missing(newdata)) { # then "fake" an object suitable for prediction
+    if (missing(newdata)) {
       newdata <- object$model
       new.data.ok <- FALSE
       nd.is.mf <- TRUE
       response <- newdata[[yname]]
-    } else {  # do an R ``standard'' evaluation to pick up data
+    } else {
       new.data.ok <- TRUE
-      if (is.data.frame(newdata)&&!is.null(attr(newdata,"terms"))) { # it's a model frame
+      if (is.data.frame(newdata)&&!is.null(attr(newdata,"terms"))) {
         if (sum(!(names(object$model)%in%names(newdata)))) stop(
           "newdata is a model.frame: it should contain all required variables\n")
         nd.is.mf <- TRUE
@@ -201,20 +179,17 @@ predict.plbpsm <- function(object, newdata, type = "response", se.fit=FALSE,
         yname <- all.vars(object$terms)[attr(object$terms,"response")]
         naresp <- FALSE
         if (!is.null(object$family$predict)&&!is.null(newdata[[yname]])) {
-          ## response provided
-          #if (!is.null(object$pred.formula)) object$pred.formula <- attr(object$pred.formula,"full")
           response <- TRUE
           Terms <- terms(object)
           resp <- newdata[[yname]]
           if (sum(is.na(resp))>0) {
             naresp <- TRUE ## there are NAs in supplied response
-            ## replace them with a numeric code, so that rows are not dropped below
             rar <- range(resp,na.rm=TRUE)
             thresh <- rar[1]*1.01-rar[2]*.01
             resp[is.na(resp)] <- thresh
             newdata[[yname]] <- thresh
           }
-        } else { ## response not provided
+        } else {
           response <- FALSE
           Terms <- delete.response(terms(object))
         }
@@ -226,24 +201,22 @@ predict.plbpsm <- function(object, newdata, type = "response", se.fit=FALSE,
             warning("not all required variables have been supplied in  newdata!\n")
           }
           newdata <- eval(model.frame(ff,data=newdata,na.action=na.act),parent.frame())
-          if (naresp) newdata[[yname]][newdata[[yname]]<=thresh] <- NA ## reinstate as NA
-        } ## otherwise it's intercept only and newdata can be left alone
+          if (naresp) newdata[[yname]][newdata[[yname]]<=thresh] <- NA
+        }
         na.act <- attr(newdata,"na.action")
         response <- if (response) newdata[[yname]] else NULL
       }
     }
-  } else { ## newdata.guaranteed == TRUE
+  } else {
     na.act <- NULL
-    new.data.ok=TRUE ## it's guaranteed!
+    new.data.ok=TRUE
     if (!is.null(attr(newdata,"terms"))) nd.is.mf <- TRUE
     response <- newdata[[yname]]
   }
 
-  ## now check the factor levels and split into blocks...
 
   if (new.data.ok) {
-    # split prediction into blocks, to avoid running out of memory
-    if (length(newdata)==1) newdata[[2]] <- newdata[[1]] # avoids data frame losing its labels and dimensions below!
+    if (length(newdata)==1) newdata[[2]] <- newdata[[1]]
     if (is.null(dim(newdata[[1]]))) np <- length(newdata[[1]])
     else np <- dim(newdata[[1]])[1]
     nb <- length(object$coefficients)+ as.numeric(object$intercept)
@@ -251,15 +224,12 @@ predict.plbpsm <- function(object, newdata, type = "response", se.fit=FALSE,
     #+ as.numeric(length(object$basis_info)==0 && object$intercept)
     if (is.null(block.size)) block.size <- 10000
     if (block.size < 1) block.size <- np
-  } else { # no new data, just use object$model
+  } else {
     np <- nrow(object$model)
     nb <- length(object$coefficients)
   }
 
-  ## split prediction into blocks, to avoid running out of memory
   if (is.null(block.size)) {
-    ## use one block as predicting using model frame
-    ## and no block size supplied...
     n.blocks <- 1
     b.size <- array(np,1)
   } else {
@@ -281,10 +251,6 @@ predict.plbpsm <- function(object, newdata, type = "response", se.fit=FALSE,
   smooth.bivariate=which(term.smooth=="bivariate.smooth")
   n.smooth1=length(smooth.univariate)
   n.smooth=length(smooth.univariate)+length(smooth.bivariate)
-  # setup prediction arrays...
-  ## in multi-linear predictor models, lpi[[i]][j] is the column of model matrix contributing the jth col to lp i
-  #lpi <- if (is.list(object$formula)) attr(object$formula,"lpi") else NULL
-
   if (type=="terms") {
     term.labels <- attr(object$pterms,"term.labels")
     n.pterms <- length(term.labels)
@@ -300,15 +266,6 @@ predict.plbpsm <- function(object, newdata, type = "response", se.fit=FALSE,
     if (se.fit) se <- fit
   }
   stop <- 0
-  # if (is.list(object$pterms)) { ## multiple linear predictors
-  #   pstart <- attr(object$nsdf,"pstart") ## starts of parametric blocks in coef vector
-  #   pind <- rep(0,0) ## index of parametric coefs
-  #   Terms <- list();pterms <- object$pterms
-  #   for (i in 1:length(object$nsdf)) {
-  #     Terms[[i]] <- delete.response(object$pterms[[i]])
-  #     if (object$nsdf[i]>0) pind <- c(pind,pstart[i]-1+1:object$nsdf[i])
-  #   }
-  # } else { ## normal single predictor case
     Terms <- list(delete.response(object$pterms)) ## make into a list anyway
     pterms <- list(object$pterms)
     #pstart <- 1
@@ -345,9 +302,6 @@ predict.plbpsm <- function(object, newdata, type = "response", se.fit=FALSE,
     if (n.blocks==1) data <- newdata else data <- newdata[start:stop,]
     X <- matrix(0,b.size[b],nb)
     Xoff <- matrix(0,b.size[b],n.smooth) ## term specific offsets
-    #for (i in 1:length(Terms)) { ## loop for parametric components (1 per lp)
-      ## implements safe prediction for parametric part as described in
-      ## http://developer.r-project.org/model-fitting-functions.txt
       if (new.data.ok) {
         if (nd.is.mf) mf <- model.frame(data) else {
           mf <- model.frame(Terms[[1]],data)
@@ -358,12 +312,6 @@ predict.plbpsm <- function(object, newdata, type = "response", se.fit=FALSE,
         Xp <- model.matrix(Terms[[1]],object$model)
         mf <- newdata # needed in case of offset, below
       }
-      # if (drop.intercept) {
-      #   xat <- attributes(Xp);ind <- xat$assign>0
-      #   Xp <- Xp[,xat$assign>0,drop=FALSE] ## some extended families need to drop intercept
-      #   xat$assign <- xat$assign[ind];xat$dimnames[[2]]<-xat$dimnames[[2]][ind];
-      #   xat$dim[2] <- xat$dim[2]-1;attributes(Xp) <- xat
-      # }
     if (length(smooth.bivariate) > 0){object$nsdf <- object$nsdf+1}
       if (object$MI){
         if (length(object$ind.l)>0){
@@ -406,10 +354,6 @@ predict.plbpsm <- function(object, newdata, type = "response", se.fit=FALSE,
         newbeta <-matrix(newB,nrow=1)%*%matrix(object$coefficients_bivariate,ncol=1)
       }
       # print(newbeta)
-      # Xfrag <- PredictMat(object$smooth[[k]],data)
-      # X[,object$smooth[[k]]$first.para:object$smooth[[k]]$last.para] <- Xfrag
-      #Xfrag.off <- attr(Xfrag,"offset") ## any term specific offsets?
-      #if (!is.null(Xfrag.off)) { Xoff[,k] <- Xfrag.off; any.soff <- TRUE }
     } else {
       newind0 <-1:block.size
       newbeta <-0
@@ -487,7 +431,7 @@ predict.plbpsm <- function(object, newdata, type = "response", se.fit=FALSE,
         if(n.smooth1>0){
           first=n.pterms
           for (j in 1:n.smooth1) # work through the smooth terms
-          { #first <- object$basis_info[[j]]$first.para; last <- object$basis_info[[k]]$last.para
+          {
             n.para <- object$basis_info[[smooth.univariate[j]]]$n.para
             last=first+n.para
             #fit <- fit[newind,,drop=FALSE]
@@ -533,14 +477,13 @@ predict.plbpsm <- function(object, newdata, type = "response", se.fit=FALSE,
         }
         if (type=="response") { # transform
           linkinv <- fam$linkinv
-          #if (is.null(fam$predict)) {
             dmu.deta <- fam$mu.eta
             if (se.fit) se[newind3]<-se[newind3]*abs(dmu.deta(fit))
             fit[newind3] <- linkinv(fit[newind3])
             # print(fit)
         }
     }
-    }## end of link or response case
+    }
     rm(X)
   } ## end of prediction block loop
 
