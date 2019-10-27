@@ -122,7 +122,6 @@ plbpsm.setup <- function(formula,pterms,
     }
   }
 
-    if (G$nsdf>0) G$cmX[-(1:G$nsdf)] <- 0 else G$cmX <- G$cmX * 0
     if (m2 > 0){G$nsdf <- G$nsdf-1}
     G$smooth.univariate <- smooth.univariate
     G$X <- X;rm(X)
