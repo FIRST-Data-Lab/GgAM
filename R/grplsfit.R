@@ -628,7 +628,7 @@ grplsfit <- function(G, criterion, method, family, ind_c, VS, MI,...)
     eta_all <- eta
     weights_all <- if (is.null(weights)){rep(1,length(y))} else {weights}
   }
-
+  dev_sbl <- sum(dev.resids(Y, y_sbl, weights))
   wtdmu <- if (G$intercept)
     sum(weights * Y)/sum(weights) else linkinv(offset)
   nulldev <- sum(dev.resids(Y, wtdmu, weights))
