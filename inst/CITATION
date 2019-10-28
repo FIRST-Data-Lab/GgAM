@@ -1,11 +1,13 @@
 citHeader("To cite GgAM in publications use")
 
 citEntry(
- entry="R Package",
+ entry="Manual",
  title= "mgcv: Mixed GAM Computation Vehicle with Automatic Smoothness Estimation",
  year="2019",
  author="S. N. Wood",
- textVersion="Wood, S.N. (2019) mgcv: Mixed GAM Computation Vehicle with Automatic Smoothness Estimation. R package version 1.8-30. Available at "https://cran.r-project.org/web/packages/mgcv/index.html""
+ note = "R package version 1.8-30",
+ url = "https://cran.r-project.org/web/packages/mgcv/index.html",
+ textVersion="Wood, S.N. (2019) mgcv: Mixed GAM Computation Vehicle with Automatic Smoothness Estimation. R package version 1.8-30. Available at https://cran.r-project.org/web/packages/mgcv/index.html"
 )
 
 citEntry(
